@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PetDost tag</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --orange: #ff7a45; --orange-deep: #e85d2a; --cream: #fff9f4; --ink: #2a211c;
+    --soft: #7a6d66; --line: #e6dcd3; --red: #e5537a; --red-bg: #fcdde6; --teal: #1f9e8f;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cream); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 480px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .logo { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+          display: grid; place-items: center; color: #fff; font-size: 20px; }
+  .brand { font-weight: 700; font-size: 20px; color: var(--orange); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; }
+  .photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #f4ece4; }
+  .initial { width: 100%; aspect-ratio: 4 / 3; display: grid; place-items: center; font-size: 96px; font-weight: 700;
+             color: #fff; background: linear-gradient(135deg, var(--orange), var(--orange-deep)); }
+  .body { padding: 20px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.2; }
+  .muted { color: var(--soft); margin: 4px 0 0; }
+  .lost { background: var(--red-bg); color: var(--red); border-radius: 16px; padding: 14px 16px; margin-top: 16px; font-weight: 600; }
+  .lost p { margin: 6px 0 0; font-weight: 400; color: var(--ink); white-space: pre-wrap; }
+  .btn { display: block; width: 100%; text-align: center; text-decoration: none; border: 0; border-radius: 16px;
+         padding: 16px; font: 600 17px/1 inherit; cursor: pointer; margin-top: 12px; }
+  .primary { background: var(--orange); color: #fff; }
+  .call { background: var(--teal); color: #fff; }
+  .secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  form { margin-top: 20px; display: grid; gap: 12px; }
+  label { font-weight: 600; font-size: 14px; display: grid; gap: 6px; }
+  input, textarea { font: inherit; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); width: 100%; }
+  textarea { min-height: 96px; resize: vertical; }
+  .check { display: flex; gap: 10px; align-items: center; font-weight: 400; }
+  .check input { width: 20px; height: 20px; }
+  .center { text-align: center; padding: 48px 8px; }
+  .big { font-size: 56px; }
+  .error { color: var(--red); font-size: 14px; }
+  footer { text-align: center; color: var(--soft); font-size: 13px; margin-top: 24px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header><div class="logo" aria-hidden="true">🐾</div><div class="brand">PetDost</div></header>
+
+  <section id="loading" class="center"><div class="big">🐾</div><p class="muted">Loading…</p></section>
+
+  <section id="notFound" class="center" hidden>
+    <div class="big">🔍</div>
+    <h1>Tag not found</h1>
+    <p class="muted">This QR code isn't linked to a dog. Check the code and try again.</p>
+  </section>
+
+  <section id="pet" hidden>
+    <div class="card">
+      <div id="photoSlot"></div>
+      <div class="body">
+        <h1 id="petName"></h1>
+        <p class="muted" id="petMeta"></p>
+        <div class="lost" id="lostBanner" hidden>🚨 I'm lost! Please help me get home.<p id="lostMessage"></p></div>
+        <a class="btn call" id="callBtn" hidden>📞 Call my family</a>
+        <button class="btn primary" id="foundBtn" type="button">I found this dog</button>
+      </div>
+    </div>
+
+    <form id="reportForm" class="card body" hidden>
+      <strong>Tell the family</strong>
+      <label>Your name <input name="name" maxlength="60" autocomplete="name"></label>
+      <label>Your phone number <input name="phone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="So they can call you back"></label>
+      <label>Message <textarea name="message" maxlength="500" placeholder="Where did you find them? Are they safe with you?"></textarea></label>
+      <label class="check"><input type="checkbox" name="location" checked> Share my current location</label>
+      <p class="error" id="formError" hidden></p>
+      <button class="btn primary" type="submit" id="sendBtn">Send to the family</button>
+    </form>
+  </section>
+
+  <section id="thanks" class="center" hidden>
+    <div class="big">💛</div>
+    <h1>Thank you!</h1>
+    <p class="muted">Your report was sent to the family's PetDost app. If you shared your number, they can call you back.</p>
+  </section>
+
+  <footer>Every PetDost tag is private: we only show what the owner chooses to share.</footer>
+</main>
+
+<script>
+// Public anon key: safe to ship. The database only exposes public_tag() and report_sighting().
+const SUPABASE_URL = "https://gyhcziacmukxuombddxr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5aGN6aWFjbXVreHVvbWJkZHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDIyMjQsImV4cCI6MjEwNzk3ODIyNH0.H4wJ9NcxO3UkJxWOVGhwQ9oCWWoGUhp_Qf_kNYk4fJk";
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => { for (const s of ["loading", "notFound", "pet", "thanks"]) $(s).hidden = s !== id; };
+const code = (new URLSearchParams(location.search).get("t") || "").trim().toUpperCase();
+
+async function rpc(name, body) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error((data && data.message) || "Something went wrong. Please try again.");
+  return data;
+}
+
+function render(pet) {
+  // Owner-entered text is only ever inserted with textContent, never as HTML.
+  $("petName").textContent = pet.is_lost ? `Hi, I'm ${pet.pet_name}` : pet.pet_name;
+  $("petMeta").textContent = [pet.breed, pet.owner_first_name && `${pet.owner_first_name}'s dog`].filter(Boolean).join(" · ");
+
+  const slot = $("photoSlot");
+  if (pet.photo_url && pet.photo_url.startsWith(`${SUPABASE_URL}/storage/`)) {
+    const img = document.createElement("img");
+    img.className = "photo";
+    img.alt = `Photo of ${pet.pet_name}`;
+    img.src = pet.photo_url;
+    slot.replaceChildren(img);
+  } else {
+    const initial = document.createElement("div");
+    initial.className = "initial";
+    initial.textContent = (pet.pet_name || "?").trim().charAt(0).toUpperCase();
+    slot.replaceChildren(initial);
+  }
+
+  $("lostBanner").hidden = !pet.is_lost;
+  $("lostMessage").textContent = pet.lost_message || "";
+  $("lostMessage").hidden = !pet.lost_message;
+
+  const phone = (pet.contact_phone || "").replace(/[^\d+]/g, "");
+  if (phone) {
+    $("callBtn").href = `tel:${phone}`;
+    $("callBtn").hidden = false;
+  }
+  document.title = `${pet.pet_name} · PetDost`;
+  show("pet");
+}
+
+function currentPosition() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+
+$("foundBtn").addEventListener("click", () => {
+  $("reportForm").hidden = false;
+  $("foundBtn").hidden = true;
+  $("reportForm").scrollIntoView({ behavior: "smooth" });
+});
+
+$("reportForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  $("formError").hidden = true;
+  $("sendBtn").disabled = true;
+  $("sendBtn").textContent = "Sending…";
+  try {
+    const position = form.get("location") ? await currentPosition() : null;
+    const ok = await rpc("report_sighting", {
+      p_code: code,
+      p_finder_name: form.get("name") || null,
+      p_finder_phone: form.get("phone") || null,
+      p_message: form.get("message") || null,
+      p_latitude: position ? position.lat : null,
+      p_longitude: position ? position.lng : null,
+    });
+    if (ok === false) throw new Error("This tag is no longer active.");
+    show("thanks");
+  } catch (error) {
+    $("formError").textContent = error.message;
+    $("formError").hidden = false;
+    $("sendBtn").disabled = false;
+    $("sendBtn").textContent = "Send to the family";
+  }
+});
+
+(async () => {
+  if (!/^[A-Z0-9]{6,16}$/.test(code)) return show("notFound");
+  try {
+    const rows = await rpc("public_tag", { p_code: code });
+    rows && rows.length ? render(rows[0]) : show("notFound");
+  } catch {
+    $("loading").querySelector("p").textContent = "Couldn't load. Check your internet and refresh.";
+  }
+})();
+</script>
+</body>
+</html>
