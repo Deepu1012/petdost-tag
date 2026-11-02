@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PetDost</title>
+<style>
+  :root {
+    --orange: #ff7a45; --orange-deep: #e85d2a; --cream: #fff9f4; --ink: #2a211c;
+    --soft: #7a6d66; --line: #e6dcd3; --teal: #1f9e8f; --star: #f2a516;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cream); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 480px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .logo { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+          display: grid; place-items: center; color: #fff; font-size: 20px; }
+  .brand { font-weight: 700; font-size: 20px; color: var(--orange); }
+  .lang { margin-left: auto; display: flex; gap: 6px; }
+  .lang button { font: 600 14px/1 inherit; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line);
+                 background: #fff; color: var(--ink); cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; }
+  .photo { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #f4ece4; }
+  .initial { width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; font-size: 72px; font-weight: 700;
+             color: #fff; background: linear-gradient(135deg, var(--orange), var(--orange-deep)); }
+  .body { padding: 20px; }
+  h1 { margin: 0; font-size: 26px; line-height: 1.25; }
+  .muted { color: var(--soft); margin: 4px 0 0; }
+  .rating { color: var(--star); font-weight: 700; }
+  .btn { display: block; width: 100%; text-align: center; text-decoration: none; border: 0; border-radius: 16px;
+         padding: 16px; font: 600 17px/1.2 inherit; cursor: pointer; margin-top: 12px; }
+  .primary { background: var(--orange); color: #fff; }
+  .secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  h2 { font-size: 18px; margin: 24px 0 8px; }
+  .service { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .service:first-of-type { border-top: 0; }
+  .price { font-weight: 700; white-space: nowrap; }
+  .center { text-align: center; padding: 48px 8px; }
+  .big { font-size: 56px; }
+  footer { text-align: center; color: var(--soft); font-size: 13px; margin-top: 24px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">🐾</div><div class="brand">PetDost</div>
+    <div class="lang" role="group" aria-label="भाषा / Language">
+      <button type="button" data-lang="hi">हिंदी</button>
+      <button type="button" data-lang="en">English</button>
+    </div>
+  </header>
+
+  <section id="loading" class="center"><div class="big">🐾</div><p class="muted" data-t="loading"></p></section>
+
+  <section id="notFound" class="center" hidden>
+    <div class="big">🔍</div>
+    <h1 data-t="notFoundTitle"></h1>
+    <p class="muted" data-t="notFoundBody"></p>
+  </section>
+
+  <section id="business" hidden>
+    <div class="card">
+      <div id="photoSlot"></div>
+      <div class="body">
+        <h1 id="name"></h1>
+        <p class="muted" id="meta"></p>
+        <p class="muted" id="address"></p>
+        <a class="btn primary" id="bookBtn" data-t="book"></a>
+        <a class="btn secondary" id="callBtn" hidden data-t="call"></a>
+        <p class="muted" id="iosNote" hidden data-t="iosNote"></p>
+      </div>
+    </div>
+    <div class="card body" id="servicesCard" style="margin-top:16px" hidden>
+      <h2 style="margin-top:0" data-t="services"></h2>
+      <div id="services"></div>
+    </div>
+  </section>
+
+  <footer data-t="footer"></footer>
+</main>
+
+<script>
+// Public anon key: safe to ship. The database only exposes public_business() for approved businesses.
+const SUPABASE_URL = "https://gyhcziacmukxuombddxr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5aGN6aWFjbXVreHVvbWJkZHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDIyMjQsImV4cCI6MjEwNzk3ODIyNH0.H4wJ9NcxO3UkJxWOVGhwQ9oCWWoGUhp_Qf_kNYk4fJk";
+const APP_PACKAGE = "com.petdost.app";
+const PLAY_URL = `https://play.google.com/store/apps/details?id=${APP_PACKAGE}`;
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => { for (const s of ["loading", "notFound", "business"]) $(s).hidden = s !== id; };
+const id = (new URLSearchParams(location.search).get("id") || "").trim().toLowerCase();
+
+const TEXT = {
+  hi: {
+    loading: "खुल रहा है…",
+    loadFailed: "खुल नहीं सका। इंटरनेट जाँचें और पेज फिर से खोलें।",
+    notFoundTitle: "व्यवसाय नहीं मिला",
+    notFoundBody: "यह QR कोड किसी चालू व्यवसाय से नहीं जुड़ा है।",
+    book: "PetDost में आरक्षण करें",
+    call: "📞 फ़ोन करें",
+    iosNote: "PetDost अभी Android पर है।",
+    services: "सेवाएँ और मूल्य",
+    footer: "PetDost: पशु चिकित्सक और साज-सँवार का आसान आरक्षण, हिंदी और English में।",
+    kinds: { vet: "पशु दवाखाना", groomer: "साज-सँवार केंद्र", pet_shop: "पालतू पशुओं की दुकान" },
+    reviews: (n) => `${n} समीक्षाएँ`,
+    newPlace: "नया",
+    home: "🏠 घर पर भी",
+    min: (m) => m >= 60 ? `${Math.floor(m / 60)} घंटे${m % 60 ? ` ${m % 60} मिनट` : ""}` : `${m} मिनट`,
+  },
+  en: {
+    loading: "Loading…",
+    loadFailed: "Couldn't load. Check your internet and refresh.",
+    notFoundTitle: "Business not found",
+    notFoundBody: "This QR code isn't linked to a live business.",
+    book: "Book on PetDost",
+    call: "📞 Call",
+    iosNote: "PetDost is on Android for now.",
+    services: "Services and prices",
+    footer: "PetDost: easy booking for vets and grooming, in Hindi and English.",
+    kinds: { vet: "Vet clinic", groomer: "Grooming centre", pet_shop: "Pet shop" },
+    reviews: (n) => `${n} reviews`,
+    newPlace: "New",
+    home: "🏠 also at home",
+    min: (m) => m >= 60 ? `${Math.floor(m / 60)} hr${m % 60 ? ` ${m % 60} min` : ""}` : `${m} min`,
+  },
+};
+let lang = "hi";
+try { lang = localStorage.getItem("petdost-lang") || lang; } catch {}
+let shown = null;
+const t = (key) => TEXT[lang][key];
+
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  for (const el of document.querySelectorAll("[data-t]")) el.textContent = t(el.dataset.t);
+  for (const b of document.querySelectorAll(".lang button")) b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+  if (shown) render(shown);
+}
+for (const b of document.querySelectorAll(".lang button")) {
+  b.addEventListener("click", () => {
+    lang = b.dataset.lang;
+    try { localStorage.setItem("petdost-lang", lang); } catch {}
+    applyLanguage();
+  });
+}
+applyLanguage();
+
+const rupees = (paise) => "₹" + Math.round(paise / 100).toLocaleString("en-IN");
+
+function render(biz) {
+  shown = biz;
+  // Owner-entered text is only ever inserted with textContent, never as HTML.
+  $("name").textContent = biz.name;
+  const rating = biz.rating_count > 0 ? `★ ${biz.rating_avg} · ${t("reviews")(biz.rating_count)}` : t("newPlace");
+  $("meta").textContent = `${t("kinds")[biz.kind] || ""} · ${rating}`;
+  $("address").textContent = [biz.address, biz.city].filter(Boolean).join(", ");
+
+  const slot = $("photoSlot");
+  if (biz.photo_url && biz.photo_url.startsWith(`${SUPABASE_URL}/storage/`)) {
+    const img = document.createElement("img");
+    img.className = "photo";
+    img.alt = biz.name;
+    img.src = biz.photo_url;
+    slot.replaceChildren(img);
+  } else {
+    const initial = document.createElement("div");
+    initial.className = "initial";
+    initial.textContent = (biz.name || "?").trim().charAt(0).toUpperCase();
+    slot.replaceChildren(initial);
+  }
+
+  // Android: opens PetDost on this business if installed, otherwise the Play Store.
+  const android = /android/i.test(navigator.userAgent);
+  $("bookBtn").href = android
+    ? `intent://business/${biz.id}#Intent;scheme=petdost;package=${APP_PACKAGE};S.browser_fallback_url=${encodeURIComponent(PLAY_URL)};end`
+    : PLAY_URL;
+  $("iosNote").hidden = android;
+
+  const phone = (biz.phone || "").replace(/[^\d+]/g, "");
+  if (phone) { $("callBtn").href = `tel:${phone}`; $("callBtn").hidden = false; }
+
+  const list = $("services");
+  list.replaceChildren(...(biz.services || []).map((s) => {
+    const row = document.createElement("div");
+    row.className = "service";
+    const left = document.createElement("div");
+    const title = document.createElement("div");
+    title.textContent = s.name;
+    const sub = document.createElement("div");
+    sub.className = "muted";
+    sub.textContent = [t("min")(s.duration_minutes), s.location !== "clinic" && (biz.home_localities || []).length ? t("home") : null]
+      .filter(Boolean).join(" · ");
+    left.append(title, sub);
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent = rupees(s.price_paise);
+    row.append(left, price);
+    return row;
+  }));
+  $("servicesCard").hidden = !(biz.services || []).length;
+  document.title = `${biz.name} · PetDost`;
+  show("business");
+}
+
+(async () => {
+  if (!/^[0-9a-f-]{36}$/.test(id)) return show("notFound");
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/public_business`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ p_id: id }),
+    });
+    const biz = await response.json();
+    biz ? render(biz) : show("notFound");
+  } catch {
+    $("loading").querySelector("p").textContent = t("loadFailed");
+  }
+})();
+</script>
+</body>
+</html>
