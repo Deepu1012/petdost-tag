@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -46,19 +46,29 @@
   .big { font-size: 56px; }
   .error { color: var(--red); font-size: 14px; }
   footer { text-align: center; color: var(--soft); font-size: 13px; margin-top: 24px; }
+  .lang { margin-left: auto; display: flex; gap: 6px; }
+  .lang button { font: 600 14px/1 inherit; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line);
+                 background: #fff; color: var(--ink); cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: #fff; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
-  <header><div class="logo" aria-hidden="true">🐾</div><div class="brand">PetDost</div></header>
+  <header>
+    <div class="logo" aria-hidden="true">🐾</div><div class="brand">PetDost</div>
+    <div class="lang" role="group" aria-label="भाषा / Language">
+      <button type="button" data-lang="hi">हिंदी</button>
+      <button type="button" data-lang="en">English</button>
+    </div>
+  </header>
 
-  <section id="loading" class="center"><div class="big">🐾</div><p class="muted">Loading…</p></section>
+  <section id="loading" class="center"><div class="big">🐾</div><p class="muted" data-t="loading"></p></section>
 
   <section id="notFound" class="center" hidden>
     <div class="big">🔍</div>
-    <h1>Tag not found</h1>
-    <p class="muted">This QR code isn't linked to a dog. Check the code and try again.</p>
+    <h1 data-t="notFoundTitle"></h1>
+    <p class="muted" data-t="notFoundBody"></p>
   </section>
 
   <section id="pet" hidden>
@@ -67,30 +77,30 @@
       <div class="body">
         <h1 id="petName"></h1>
         <p class="muted" id="petMeta"></p>
-        <div class="lost" id="lostBanner" hidden>🚨 I'm lost! Please help me get home.<p id="lostMessage"></p></div>
-        <a class="btn call" id="callBtn" hidden>📞 Call my family</a>
-        <button class="btn primary" id="foundBtn" type="button">I found this dog</button>
+        <div class="lost" id="lostBanner" hidden><span data-t="lost"></span><p id="lostMessage"></p></div>
+        <a class="btn call" id="callBtn" hidden data-t="call"></a>
+        <button class="btn primary" id="foundBtn" type="button"></button>
       </div>
     </div>
 
     <form id="reportForm" class="card body" hidden>
-      <strong>Tell the family</strong>
-      <label>Your name <input name="name" maxlength="60" autocomplete="name"></label>
-      <label>Your phone number <input name="phone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="So they can call you back"></label>
-      <label>Message <textarea name="message" maxlength="500" placeholder="Where did you find them? Are they safe with you?"></textarea></label>
-      <label class="check"><input type="checkbox" name="location" checked> Share my current location</label>
+      <strong data-t="tellFamily"></strong>
+      <label><span data-t="yourName"></span> <input name="name" maxlength="60" autocomplete="name"></label>
+      <label><span data-t="yourPhone"></span> <input name="phone" maxlength="20" inputmode="tel" autocomplete="tel" data-t-placeholder="phoneHint"></label>
+      <label><span data-t="message"></span> <textarea name="message" maxlength="500" data-t-placeholder="messageHint"></textarea></label>
+      <label class="check"><input type="checkbox" name="location" checked> <span data-t="shareLocation"></span></label>
       <p class="error" id="formError" hidden></p>
-      <button class="btn primary" type="submit" id="sendBtn">Send to the family</button>
+      <button class="btn primary" type="submit" id="sendBtn" data-t="send"></button>
     </form>
   </section>
 
   <section id="thanks" class="center" hidden>
     <div class="big">💛</div>
-    <h1>Thank you!</h1>
-    <p class="muted">Your report was sent to the family's PetDost app. If you shared your number, they can call you back.</p>
+    <h1 data-t="thanksTitle"></h1>
+    <p class="muted" data-t="thanksBody"></p>
   </section>
 
-  <footer>Every PetDost tag is private: we only show what the owner chooses to share.</footer>
+  <footer data-t="footer"></footer>
 </main>
 
 <script>
@@ -102,6 +112,95 @@ const $ = (id) => document.getElementById(id);
 const show = (id) => { for (const s of ["loading", "notFound", "pet", "thanks"]) $(s).hidden = s !== id; };
 const code = (new URLSearchParams(location.search).get("t") || "").trim().toUpperCase();
 
+// Hindi first (PetDost's home is Muzaffarnagar); the finder can switch at the top.
+const TEXT = {
+  hi: {
+    loading: "खुल रहा है…",
+    loadFailed: "खुल नहीं सका। इंटरनेट जाँचें और पेज फिर से खोलें।",
+    notFoundTitle: "पहचान पट्टी नहीं मिली",
+    notFoundBody: "यह QR कोड किसी पशु से नहीं जुड़ा है। कोड जाँचकर फिर से प्रयास करें।",
+    lost: "🚨 मैं खो गया हूँ! कृपया मुझे घर पहुँचाने में मदद करें।",
+    call: "📞 मेरे परिवार को फ़ोन करें",
+    tellFamily: "परिवार को बताएँ",
+    yourName: "आपका नाम",
+    yourPhone: "आपका फ़ोन नंबर",
+    phoneHint: "ताकि वे आपको वापस फ़ोन कर सकें",
+    message: "संदेश",
+    messageHint: "आपको यह कहाँ मिला? क्या यह आपके पास सुरक्षित है?",
+    shareLocation: "मेरा वर्तमान स्थान भेजें",
+    send: "परिवार को भेजें",
+    sending: "भेज रहे हैं…",
+    inactive: "यह पहचान पट्टी अब चालू नहीं है।",
+    tooMany: "इस पशु के लिए अभी बहुत अधिक सूचनाएँ आ चुकी हैं। कृपया कुछ देर बाद प्रयास करें।",
+    failed: "कुछ गड़बड़ हो गई। कृपया फिर से प्रयास करें।",
+    thanksTitle: "धन्यवाद!",
+    thanksBody: "आपकी सूचना परिवार के PetDost ऐप पर भेज दी गई। अगर आपने नंबर दिया है, तो वे आपको फ़ोन कर सकते हैं।",
+    footer: "हर PetDost पहचान पट्टी निजी है: हम वही दिखाते हैं जो मालिक दिखाना चाहते हैं।",
+    hi: (name) => `नमस्ते, मैं ${name} हूँ`,
+    photo: (name) => `${name} की तस्वीर`,
+    // [noun, "found" verb, possessive] per species, so the grammar fits: "मुझे यह बिल्ली मिली".
+    species: { dog: ["कुत्ता", "मिला", "का"], cat: ["बिल्ली", "मिली", "की"], bird: ["पक्षी", "मिला", "का"],
+               rabbit: ["खरगोश", "मिला", "का"], other: ["पशु", "मिला", "का"] },
+    found: ([noun, verb]) => `मुझे यह ${noun} ${verb}`,
+    owners: (owner, [noun, , of]) => `${owner} ${of} ${noun}`,
+  },
+  en: {
+    loading: "Loading…",
+    loadFailed: "Couldn't load. Check your internet and refresh.",
+    notFoundTitle: "Tag not found",
+    notFoundBody: "This QR code isn't linked to a pet. Check the code and try again.",
+    lost: "🚨 I'm lost! Please help me get home.",
+    call: "📞 Call my family",
+    tellFamily: "Tell the family",
+    yourName: "Your name",
+    yourPhone: "Your phone number",
+    phoneHint: "So they can call you back",
+    message: "Message",
+    messageHint: "Where did you find them? Are they safe with you?",
+    shareLocation: "Share my current location",
+    send: "Send to the family",
+    sending: "Sending…",
+    inactive: "This tag is no longer active.",
+    tooMany: "Too many reports for this pet right now. Please try again later.",
+    failed: "Something went wrong. Please try again.",
+    thanksTitle: "Thank you!",
+    thanksBody: "Your report was sent to the family's PetDost app. If you shared your number, they can call you back.",
+    footer: "Every PetDost tag is private: we only show what the owner chooses to share.",
+    hi: (name) => `Hi, I'm ${name}`,
+    photo: (name) => `Photo of ${name}`,
+    species: { dog: ["dog"], cat: ["cat"], bird: ["bird"], rabbit: ["rabbit"], other: ["pet"] },
+    found: ([noun]) => `I found this ${noun}`,
+    owners: (owner, [noun]) => `${owner}'s ${noun}`,
+  },
+};
+let lang = "hi";
+try { lang = localStorage.getItem("petdost-lang") || lang; } catch {}
+let shownPet = null;
+const t = (key) => TEXT[lang][key];
+
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  for (const el of document.querySelectorAll("[data-t]")) el.textContent = t(el.dataset.t);
+  for (const el of document.querySelectorAll("[data-t-placeholder]")) el.placeholder = t(el.dataset.tPlaceholder);
+  for (const b of document.querySelectorAll(".lang button")) b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+  if (shownPet) render(shownPet);
+}
+
+for (const b of document.querySelectorAll(".lang button")) {
+  b.addEventListener("click", () => {
+    lang = b.dataset.lang;
+    try { localStorage.setItem("petdost-lang", lang); } catch {}
+    applyLanguage();
+  });
+}
+applyLanguage();
+
+/** Server messages the finder can see, in the page language. */
+function friendlyError(message) {
+  if (/too many reports/i.test(message || "")) return t("tooMany");
+  return t("failed");
+}
+
 async function rpc(name, body) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: "POST",
@@ -109,20 +208,23 @@ async function rpc(name, body) {
     body: JSON.stringify(body),
   });
   const data = await response.json().catch(() => null);
-  if (!response.ok) throw new Error((data && data.message) || "Something went wrong. Please try again.");
+  if (!response.ok) throw new Error(friendlyError(data && data.message));
   return data;
 }
 
 function render(pet) {
+  shownPet = pet;
+  const kind = t("species")[pet.species] || t("species").other;
   // Owner-entered text is only ever inserted with textContent, never as HTML.
-  $("petName").textContent = pet.is_lost ? `Hi, I'm ${pet.pet_name}` : pet.pet_name;
-  $("petMeta").textContent = [pet.breed, pet.owner_first_name && `${pet.owner_first_name}'s dog`].filter(Boolean).join(" · ");
+  $("petName").textContent = pet.is_lost ? t("hi")(pet.pet_name) : pet.pet_name;
+  $("petMeta").textContent = [pet.breed, pet.owner_first_name && t("owners")(pet.owner_first_name, kind)].filter(Boolean).join(" · ");
+  $("foundBtn").textContent = t("found")(kind);
 
   const slot = $("photoSlot");
   if (pet.photo_url && pet.photo_url.startsWith(`${SUPABASE_URL}/storage/`)) {
     const img = document.createElement("img");
     img.className = "photo";
-    img.alt = `Photo of ${pet.pet_name}`;
+    img.alt = t("photo")(pet.pet_name);
     img.src = pet.photo_url;
     slot.replaceChildren(img);
   } else {
@@ -167,7 +269,7 @@ $("reportForm").addEventListener("submit", async (event) => {
   const form = new FormData(event.target);
   $("formError").hidden = true;
   $("sendBtn").disabled = true;
-  $("sendBtn").textContent = "Sending…";
+  $("sendBtn").textContent = t("sending");
   try {
     const position = form.get("location") ? await currentPosition() : null;
     const ok = await rpc("report_sighting", {
@@ -178,13 +280,13 @@ $("reportForm").addEventListener("submit", async (event) => {
       p_latitude: position ? position.lat : null,
       p_longitude: position ? position.lng : null,
     });
-    if (ok === false) throw new Error("This tag is no longer active.");
+    if (ok === false) throw new Error(t("inactive"));
     show("thanks");
   } catch (error) {
     $("formError").textContent = error.message;
     $("formError").hidden = false;
     $("sendBtn").disabled = false;
-    $("sendBtn").textContent = "Send to the family";
+    $("sendBtn").textContent = t("send");
   }
 });
 
@@ -194,7 +296,7 @@ $("reportForm").addEventListener("submit", async (event) => {
     const rows = await rpc("public_tag", { p_code: code });
     rows && rows.length ? render(rows[0]) : show("notFound");
   } catch {
-    $("loading").querySelector("p").textContent = "Couldn't load. Check your internet and refresh.";
+    $("loading").querySelector("p").textContent = t("loadFailed");
   }
 })();
 </script>
