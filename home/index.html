@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PetDost — पशु मालिकों और पशु सेवाओं को जोड़ने वाला ऐप</title>
+<meta name="description" content="PetDost: अपने पशु के टीके और स्वास्थ्य रिकॉर्ड रखें, आस-पास के पशु चिकित्सक और ग्रूमर से समय लें। Keep your pet's records and book nearby vets and groomers.">
+<style>
+  :root {
+    --bg: #fff9f4; --ink: #2a211c; --muted: #7a6d66;
+    --orange: #e85d2a; --line: #e6dcd3; --card: #fff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+  header { text-align: center; padding: 48px 0 8px; }
+  .paw { font-size: 52px; line-height: 1; }
+  h1 { color: var(--orange); font-size: 40px; margin: 12px 0 6px; }
+  .tag { font-size: 19px; margin: 0 0 4px; }
+  .tag-en { color: var(--muted); margin: 0; }
+  .city { display: inline-block; margin-top: 18px; padding: 5px 14px; border-radius: 999px;
+          background: #ffe9df; color: #b4441c; font-size: 14px; font-weight: 600; }
+  h2 { margin: 40px 0 14px; font-size: 24px; }
+  h2 .en { color: var(--muted); font-weight: 400; font-size: 17px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .apps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .app { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+  .app h3 { margin: 0 0 4px; font-size: 20px; color: var(--orange); }
+  .app .who { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+  .app ul { margin: 0; padding-left: 20px; font-size: 15px; }
+  .app li { margin-bottom: 5px; }
+  .soon { display: inline-block; margin-top: 14px; padding: 7px 14px; border-radius: 10px;
+          background: #f3ece6; color: var(--muted); font-size: 14px; }
+  .note { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--orange);
+          border-radius: 12px; padding: 14px 18px; font-size: 15px; }
+  footer { margin: 52px 0 40px; padding-top: 22px; border-top: 1px solid var(--line);
+           font-size: 15px; color: var(--muted); text-align: center; }
+  footer a { color: var(--orange); }
+  footer nav { margin-bottom: 10px; }
+  footer nav a { display: inline-block; margin: 0 9px 6px; }
+  @media (max-width: 480px) { h1 { font-size: 32px; } header { padding-top: 34px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="paw">🐾</div>
+  <h1>PetDost</h1>
+  <p class="tag">अपने पशु का ध्यान रखें — रिकॉर्ड, टीके और आस-पास के पशु चिकित्सक, एक ही जगह।</p>
+  <p class="tag-en">Keep your pet's records and vaccines in order, and book nearby vets and groomers.</p>
+  <span class="city">अभी मुज़फ़्फ़रनगर में · Launching in Muzaffarnagar</span>
+</header>
+
+<h2>PetDost क्या करता है <span class="en">· What PetDost does</span></h2>
+<div class="grid">
+  <div class="card">
+    <h3>🗂️ पशु का रिकॉर्ड</h3>
+    <p>कुत्ता, बिल्ली, पक्षी, खरगोश — हर पशु के टीके, डॉक्टर की यात्रा, खाना और ग्रूमिंग का हिसाब एक जगह।</p>
+  </div>
+  <div class="card">
+    <h3>🔔 टीके की याद</h3>
+    <p>टीका कब लगना है, ऐप अपने आप याद दिला देता है — ताकि कोई तारीख़ छूटे नहीं।</p>
+  </div>
+  <div class="card">
+    <h3>📅 आरक्षण</h3>
+    <p>पास के पशु चिकित्सक और ग्रूमर से समय लें — क्लिनिक पर या घर पर आने के लिए।</p>
+  </div>
+  <div class="card">
+    <h3>🏷️ QR पट्टा</h3>
+    <p>पशु खो जाए तो जिसे मिले वह QR स्कैन करके सीधे आपसे संपर्क कर सकता है।</p>
+  </div>
+  <div class="card">
+    <h3>💵 दौरे पर भुगतान</h3>
+    <p>पैसा आप सीधे व्यवसाय को देते हैं — नक़द या UPI से। ऐप में कोई भुगतान नहीं, कोई छिपा शुल्क नहीं।</p>
+  </div>
+  <div class="card">
+    <h3>⭐ सच्ची राय</h3>
+    <p>रेटिंग वही दे सकता है जिसका दौरा पूरा हुआ हो, इसलिए राय भरोसे की होती है।</p>
+  </div>
+</div>
+
+<h2>दो ऐप <span class="en">· Two apps</span></h2>
+<div class="apps">
+  <div class="app">
+    <h3>PetDost</h3>
+    <p class="who">पशु मालिकों के लिए · For pet owners</p>
+    <ul>
+      <li>अपने पशुओं का पूरा रिकॉर्ड</li>
+      <li>टीके और दौरे की याद</li>
+      <li>पशु चिकित्सक और ग्रूमर से आरक्षण</li>
+      <li>खोए पशु के लिए QR पट्टा</li>
+    </ul>
+  </div>
+  <div class="app">
+    <h3>PetDost Partner</h3>
+    <p class="who">व्यवसायों के लिए · For vets, groomers and pet shops</p>
+    <ul>
+      <li>अपना क्लिनिक या दुकान सूचीबद्ध करें</li>
+      <li>आरक्षण स्वीकार करें और प्रबंधित करें</li>
+      <li>सेवाएँ, दाम और समय ख़ुद तय करें</li>
+      <li>अभी पूरी तरह मुफ़्त — कोई कमीशन नहीं</li>
+    </ul>
+  </div>
+</div>
+<p><span class="soon">दोनों ऐप जल्द ही Google Play पर · Both apps coming soon to Google Play</span></p>
+
+<h2>व्यवसाय चलाते हैं? <span class="en">· Run a clinic, salon or pet shop?</span></h2>
+<p class="note">
+  PetDost पर सूचीबद्ध होना <strong>अभी मुफ़्त है</strong> — कोई मासिक शुल्क नहीं, कोई कमीशन नहीं। ग्राहक आपको दौरे पर सीधे भुगतान करता है।
+  जुड़ने के लिए <a href="mailto:petdost.support@gmail.com?subject=PetDost%20par%20listing">petdost.support@gmail.com</a> पर लिखें।
+  <br><br>
+  <span class="tag-en">Listing is free — no monthly fee, no commission. Customers pay you directly at the visit. Write to us to get listed.</span>
+</p>
+
+<h2>सहायता <span class="en">· Support</span></h2>
+<p>कोई प्रश्न या शिकायत हो तो <a href="mailto:petdost.support@gmail.com">petdost.support@gmail.com</a> पर लिखें। हम 30 दिन के भीतर उत्तर देते हैं।<br>
+<span class="tag-en">Questions or complaints: write to us and we reply within 30 days.</span></p>
+
+<footer>
+  <nav>
+    <a href="../privacy/">निजता नीति · Privacy</a>
+    <a href="../terms/">नियम व शर्तें · Terms</a>
+    <a href="../delete-account/">खाता हटाएँ · Delete account</a>
+    <a href="mailto:petdost.support@gmail.com">संपर्क · Contact</a>
+  </nav>
+  <p>© 2026 PetDost · भारत में बना 🇮🇳</p>
+</footer>
+
+</div>
+</body>
+</html>
