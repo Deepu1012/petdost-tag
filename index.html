@@ -104,9 +104,9 @@
 </main>
 
 <script>
-// Public anon key: safe to ship. The database only exposes public_tag() and report_sighting().
-const SUPABASE_URL = "https://gyhcziacmukxuombddxr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5aGN6aWFjbXVreHVvbWJkZHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MDIyMjQsImV4cCI6MjEwNzk3ODIyNH0.H4wJ9NcxO3UkJxWOVGhwQ9oCWWoGUhp_Qf_kNYk4fJk";
+// petdost-prod. Public anon key: safe to ship - the database only exposes public_tag() and report_sighting().
+const SUPABASE_URL = "https://bvjomhokmsggvyypxccr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2am9taG9rbXNnZ3Z5eXB4Y2NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MzkwMzgsImV4cCI6MjEwOTIxNTAzOH0.Mn04WbfAfLoWGP6jh6YL62RyyEgQvWFiMc10UFMKNnM";
 
 const $ = (id) => document.getElementById(id);
 const show = (id) => { for (const s of ["loading", "notFound", "pet", "thanks"]) $(s).hidden = s !== id; };
